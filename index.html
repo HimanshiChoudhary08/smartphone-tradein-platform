@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartExchange - Smartphone Trade-In Assessment Platform</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent-green: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    select, input {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--primary);
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 16px;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-accept {
+      background-color: var(--accent-green);
+    }
+
+    .btn-accept:hover {
+      background-color: #15803d;
+    }
+
+    #result-section {
+      display: none;
+    }
+
+    .valuation-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .valuation-box h3 {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .valuation-box .price {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 10px 0;
+    }
+
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .breakdown-table th, .breakdown-table td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .breakdown-table th {
+      background-color: #f1f5f9;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef9c3; color: #854d0e; }
+
+    #confirmation-message {
+      display: none;
+      padding: 16px;
+      background-color: #dcfce7;
+      color: #166534;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>SmartExchange</h1>
+      <p>Instant Transparent Smartphone Trade-In Valuation Platform</p>
+    </header>
+
+    <!-- Step 1: Device Information -->
+    <div class="card">
+      <h2>1. Select Device Details & Specifications</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="brand">Brand</label>
+          <select id="brand" onchange="updateModels()">
+            <option value="">Select Brand</option>
+            <option value="Apple">Apple</option>
+            <option value="Samsung">Samsung</option>
+            <option value="OnePlus">OnePlus</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="model">Model</label>
+          <select id="model">
+            <option value="">Select Model</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="storage">Storage Capacity</label>
+          <select id="storage">
+            <option value="64">64 GB</option>
+            <option value="128" selected>128 GB</option>
+            <option value="256">256 GB</option>
+            <option value="512">512 GB</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="age">Device Age</label>
+          <select id="age">
+            <option value="0.9">Under 1 Year</option>
+            <option value="0.75" selected>1 - 2 Years</option>
+            <option value="0.6">2 - 3 Years</option>
+            <option value="0.4">Above 3 Years</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Physical & Functional Assessment -->
+    <div class="card">
+      <h2>2. Condition Assessment</h2>
+      
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label for="body-condition">Body & Screen Condition</label>
+        <select id="body-condition">
+          <option value="1.0">Flawless (No scratches or dents)</option>
+          <option value="0.85" selected>Good (Minor light scratches)</option>
+          <option value="0.7">Fair (Visible dents / deep scratches)</option>
+          <option value="0.5">Cracked Screen / Damaged Body</option>
+        </select>
+      </div>
+
+      <label style="font-weight:600; font-size:0.9rem;">Functional Checks (Uncheck if defective):</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" id="chk-display" checked> Working Display</label>
+        <label class="checkbox-item"><input type="checkbox" id="chk-touch" checked> Touchscreen Functional</label>
+        <label class="checkbox-item"><input type="checkbox" id="chk-camera" checked> Cameras Functional</label>
+        <label class="checkbox-item"><input type="checkbox" id="chk-battery" checked> Battery Holds Charge</label>
+        <label class="checkbox-item"><input type="checkbox" id="chk-wifi" checked> Wi-Fi & Cellular Working</label>
+      </div>
+    </div>
+
+    <button class="btn" onclick="calculateValuation()">Calculate Trade-In Offer</button>
+
+    <!-- Step 3: Offer Generation & Summary -->
+    <div class="card" id="result-section">
+      <h2>3. Trade-In Valuation Offer</h2>
+      
+      <div class="valuation-box">
+        <h3>Estimated Instant Cash Value</h3>
+        <div class="price" id="final-price">₹0</div>
+        <span class="badge badge-success">Offer Valid for 7 Days</span>
+      </div>
+
+      <h3>Valuation Breakdown</h3>
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>Factor</th>
+            <th>Details</th>
+            <th>Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Base Market Value</td>
+            <td id="tb-base-model">-</td>
+            <td id="tb-base-val">₹0</td>
+          </tr>
+          <tr>
+            <td>Storage Bonus</td>
+            <td id="tb-storage">-</td>
+            <td id="tb-storage-val">+₹0</td>
+          </tr>
+          <tr>
+            <td>Age Depreciation</td>
+            <td id="tb-age">-</td>
+            <td id="tb-age-val">-</td>
+          </tr>
+          <tr>
+            <td>Physical & Functional Condition</td>
+            <td id="tb-condition">-</td>
+            <td id="tb-condition-val">-</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button class="btn btn-accept" onclick="acceptOffer()">Accept Offer & Schedule Pickup</button>
+      <div id="confirmation-message">
+        🎉 Offer Accepted! Your trade-in request has been submitted successfully. A collection agent will contact you shortly.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const deviceData = {
+      Apple: {
+        "iPhone 12": 32000,
+        "iPhone 13": 42000,
+        "iPhone 14": 52000
+      },
+      Samsung: {
+        "Galaxy S21": 25000,
+        "Galaxy S22": 35000,
+        "Galaxy S23": 48000
+      },
+      OnePlus: {
+        "OnePlus 9": 20000,
+        "OnePlus 10 Pro": 30000,
+        "OnePlus 11": 41000
+      }
+    };
+
+    function updateModels() {
+      const brand = document.getElementById("brand").value;
+      const modelSelect = document.getElementById("model");
+      modelSelect.innerHTML = '<option value="">Select Model</option>';
+
+      if (brand && deviceData[brand]) {
+        Object.keys(deviceData[brand]).forEach(model => {
+          const opt = document.createElement("option");
+          opt.value = model;
+          opt.textContent = model;
+          modelSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function calculateValuation() {
+      const brand = document.getElementById("brand").value;
+      const model = document.getElementById("model").value;
+      const storage = parseInt(document.getElementById("storage").value);
+      const ageMultiplier = parseFloat(document.getElementById("age").value);
+      const bodyMultiplier = parseFloat(document.getElementById("body-condition").value);
+
+      if (!brand || !model) {
+        alert("Please select both a brand and a model.");
+        return;
+      }
+
+      const baseValue = deviceData[brand][model];
+      
+      // Storage calculation
+      let storageBonus = 0;
+      if (storage === 128) storageBonus = 1500;
+      if (storage === 256) storageBonus = 3500;
+      if (storage === 512) storageBonus = 6000;
+
+      // Functional defect deductions
+      let functionalDeduction = 0;
+      if (!document.getElementById("chk-display").checked) functionalDeduction += 3000;
+      if (!document.getElementById("chk-touch").checked) functionalDeduction += 2000;
+      if (!document.getElementById("chk-camera").checked) functionalDeduction += 1500;
+      if (!document.getElementById("chk-battery").checked) functionalDeduction += 1000;
+      if (!document.getElementById("chk-wifi").checked) functionalDeduction += 1500;
+
+      // Valuation formula
+      let estimatedVal = (baseValue + storageBonus) * ageMultiplier * bodyMultiplier - functionalDeduction;
+      if (estimatedVal < 1000) estimatedVal = 1000; // Minimum residual value
+
+      // Display results
+      document.getElementById("final-price").textContent = "₹" + Math.round(estimatedVal).toLocaleString("en-IN");
+      
+      document.getElementById("tb-base-model").textContent = `${brand} ${model}`;
+      document.getElementById("tb-base-val").textContent = "₹" + baseValue.toLocaleString("en-IN");
+
+      document.getElementById("tb-storage").textContent = `${storage} GB`;
+      document.getElementById("tb-storage-val").textContent = "+₹" + storageBonus.toLocaleString("en-IN");
+
+      const ageText = document.getElementById("age").options[document.getElementById("age").selectedIndex].text;
+      document.getElementById("tb-age").textContent = ageText;
+      document.getElementById("tb-age-val").textContent = Math.round((1 - ageMultiplier) * 100) + "% Reduction";
+
+      const bodyText = document.getElementById("body-condition").options[document.getElementById("body-condition").selectedIndex].text;
+      document.getElementById("tb-condition").textContent = bodyText;
+      document.getElementById("tb-condition-val").textContent = Math.round((1 - bodyMultiplier) * 100) + "% Reduction + ₹" + functionalDeduction + " functional deductions";
+
+      document.getElementById("result-section").style.display = "block";
+      document.getElementById("confirmation-message").style.display = "none";
+      
+      document.getElementById("result-section").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function acceptOffer() {
+      document.getElementById("confirmation-message").style.display = "block";
+    }
+  </script>
+</body>
+</html>
